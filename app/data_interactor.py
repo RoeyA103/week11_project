@@ -1,27 +1,6 @@
-import os
 from models.contacts import *
 from pymongo import MongoClient 
 from bson import ObjectId
-
-
-
-# uri = "localhost:27017"
-# client = MongoClient(uri)
-
-# try:
-#     database = client.get_database("phonebook")
-#     contacts = database.get_collection("contacts")
-
-#     # Query for a movie that has the title 'Back to the Future'
-#     query = { "firstname": "nana" }
-#     contact = contacts.find()
-
-#     print(list(contact))
-
-#     client.close()
-
-# except Exception as e:
-#     raise Exception("Unable to find the document due to the following error: ", e)
 
 
 class DataInteractor:
@@ -65,22 +44,13 @@ class DataInteractor:
         try:
             client = MongoClient(self.uri)
 
-            client.admin.command("ping")
-
-            print("✅ MongoDB connected successfully")
-
-
                 
             database = client.get_database("phonebook")
             contacts_col = database.get_collection("contacts")
 
-            contacts = contacts_col.insert_one(contact_data)
+            result = contacts_col.insert_one(contact_data)
 
-            first_key, first_value = next(iter(contact_data.items()))
-
-            result = contacts_col.find_one({first_key:first_value})
-
-            return result["_id"]
+            return result.inserted_id
 
 
         except Exception as e:
@@ -109,6 +79,9 @@ class DataInteractor:
 
         except Exception:
             return False 
+        
+        finally:
+            client.close()
            
 
 
@@ -131,3 +104,6 @@ class DataInteractor:
 
         except Exception:
             return False 
+        
+        finally:
+            client.close()
