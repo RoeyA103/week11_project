@@ -16,13 +16,18 @@ def list_contacts():
 @router.post("/")
 def create_contact(contact: Contact):
     """Create new contact"""
-    return dti.create_contact(contact.model_dump())
+    id = dti.create_contact(contact.model_dump())
+    response = {"message": "Contact created successfully","id": f"{id}"}
+    return response
 
 
 @router.put("/{id}")
-def update_contact(id: str, contact: ContactUpdate.model_dump()):
+def update_contact(id: str, contact: ContactUpdate):
     """Update existing contact"""
-    return dti.update_contact(contact_id=id, contact=contact)
+    result =  dti.update_contact(contact_id=id, contact=contact.model_dump(exclude_none=True))
+    if result:
+        return {"The contact was successfully updated"}
+    return ("The contact was not updated successfully")
 
 
 @router.delete("/{id}")
