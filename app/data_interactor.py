@@ -1,45 +1,31 @@
 import os
 from models.contacts import *
-
-from pymongo import MongoClient
-
-
-def get_client(uri: str):
-    try:
-        client = MongoClient(uri)
-
-        client.admin.command("ping")
-
-        print("✅ MongoDB connected successfully")
-        return client
-
-    except Exception as e:
-        return e
+from pymongo import MongoClient 
+from bson import ObjectId
 
 
 
+# uri = "localhost:27017"
+# client = MongoClient(uri)
 
-uri = "localhost:27017"
-client = MongoClient(uri)
+# try:
+#     database = client.get_database("phonebook")
+#     contacts = database.get_collection("contacts")
 
-try:
-    database = client.get_database("phonebook")
-    contacts = database.get_collection("contacts")
+#     # Query for a movie that has the title 'Back to the Future'
+#     query = { "firstname": "nana" }
+#     contact = contacts.find()
 
-    # Query for a movie that has the title 'Back to the Future'
-    query = { "firstname": "nana" }
-    contact = contacts.find()
+#     print(list(contact))
 
-    print(list(contact))
+#     client.close()
 
-    client.close()
-
-except Exception as e:
-    raise Exception("Unable to find the document due to the following error: ", e)
+# except Exception as e:
+#     raise Exception("Unable to find the document due to the following error: ", e)
 
 
 class DataInteractor:
-    def __init__(self,uri):
+    def __init__(self,uri:str):
         self.uri = uri
         
     def get_all_contacts(self)-> list[dict]:
@@ -57,8 +43,15 @@ class DataInteractor:
             contacts_col = database.get_collection("contacts")
 
             contacts = contacts_col.find()
+            result = []
+            for doc in contacts:
+                doc["_id"] = str(doc["_id"])
+                result.append(doc)
 
-            return list(contacts)
+            print(result)
+            return result
+            
+
 
 
         except Exception as e:
@@ -119,5 +112,22 @@ class DataInteractor:
            
 
 
-    def delete_contact(id: str)-> bool:
-        pass
+    def delete_contact(self,id: str)-> bool:
+        try:
+            client = MongoClient(self.uri)
+
+            client.admin.command("ping")
+
+            print("✅ MongoDB connected successfully")
+
+                
+            database = client.get_database("phonebook")
+
+            contacts_col = database.get_collection("contacts")
+
+            contacts_col.delete_one({"_id": ObjectId(id)})   
+
+            return True
+
+        except Exception:
+            return False 

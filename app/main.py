@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from routes.contact import router as contacts_router
-from app.models.contacts import *
+from models.contacts import *
 
 
 app = FastAPI()
