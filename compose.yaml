@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongo_data:/data/db
+
+  api:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: api_server
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      MONGO_URL: "mongodb://root:example@mongodb:27017"
+    depends_on:
+      - mongodb
+
+volumes:
+  mongo_data:

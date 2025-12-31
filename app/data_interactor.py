@@ -40,7 +40,11 @@ class DataInteractor:
             client.close()
 
 
-    def create_contact(self,contact_data: dict)-> str:
+    def create_contact(self,contact_data: dict)-> list:
+        def cheack_phone_uniqe(contacts_col , phone:str):
+            res = contacts_col.find_one({"phone_number":phone})
+            return res is None
+
         try:
             client = MongoClient(self.uri)
 
@@ -48,13 +52,17 @@ class DataInteractor:
             database = client.get_database("phonebook")
             contacts_col = database.get_collection("contacts")
 
-            result = contacts_col.insert_one(contact_data)
+            if cheack_phone_uniqe(contacts_col, contact_data["phone_number"]):
 
-            return result.inserted_id
+                result = contacts_col.insert_one(contact_data)
+
+                return [True,result.inserted_id]
+            
+            return [False,"phone is not uniqe"]
 
 
         except Exception as e:
-            return f"Unable to find the document due to the following error: {e}" 
+            return [False,f"Unable to find the document due to the following error: {e}" ]
         
         finally:
             client.close()
@@ -73,11 +81,12 @@ class DataInteractor:
 
             contacts_col = database.get_collection("contacts")
 
-            contacts_col.update_one({"_id": f"{id}"},{"$set": {contact_data}})   
+            contacts_col.update_one({"_id": ObjectId(id)},{"$set": contact_data})   
 
             return True
 
-        except Exception:
+        except Exception as e:
+            print(e)
             return False 
         
         finally:

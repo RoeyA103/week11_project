@@ -1,8 +1,10 @@
 from fastapi import APIRouter
 from models.contacts import Contact, ContactUpdate
 from data_interactor import DataInteractor
+import os
+uri = os.getenv("MONGO_URL")
 
-dti= DataInteractor(uri = "localhost:27017")
+dti= DataInteractor(uri)
 
 router = APIRouter(prefix="/contacts", tags=["Contacts"])
 
@@ -16,9 +18,11 @@ def list_contacts():
 @router.post("/")
 def create_contact(contact: Contact):
     """Create new contact"""
-    id = dti.create_contact(contact.model_dump())
-    response = {"message": "Contact created successfully","id": f"{id}"}
-    return response
+    res = dti.create_contact(contact.model_dump())
+    if res[0]:
+        message = {"message": "Contact created successfully","id": f"{res[1]}"}
+        return message
+    return res[1]
 
 
 @router.put("/{id}")
