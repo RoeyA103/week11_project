@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from models.contacts import Contact, ContactUpdate
 from data_interactor import DataInteractor
 import os
+
 uri = os.getenv("MONGO_URL")
 
 dti= DataInteractor(uri)
